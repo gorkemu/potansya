@@ -16,8 +16,7 @@ app.get('/', (req, res) => {
   res.send('Potansya API Sunucusu Çalışıyor! 🚀');
 });
 
-// TODO: Route'ları buraya ekleyeceğiz
-// app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/users', require('./routes/userRoutes'));
 
 
 const PORT = process.env.PORT || 5001;
