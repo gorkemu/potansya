@@ -81,8 +81,51 @@ const getMe = asyncHandler(async (req, res) => {
   res.status(200).json(req.user);
 });
 
+
+// @desc    Kullanıcı profilini günceller
+// @route   PUT /api/users/profile
+// @access  Private
+const updateUserProfile = asyncHandler(async (req, res) => {
+  // req.user, protect middleware'inden geliyor
+  const user = await User.findById(req.user.id);
+
+  if (user) {
+    user.name = req.body.name || user.name;
+    user.headline = req.body.headline || user.headline;
+    
+    // Eğer istekte bu alanlar varsa, onları güncelle.
+    // Bu, kullanıcının sadece tek bir alanı (örn: sadece skilleri) göndermesine izin verir.
+    if (req.body.skills) {
+        user.skills = req.body.skills;
+    }
+    if (req.body.experiences) {
+        user.experiences = req.body.experiences;
+    }
+    if (req.body.interests) {
+        user.interests = req.body.interests;
+    }
+
+    const updatedUser = await user.save();
+
+    res.json({
+      _id: updatedUser.id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      headline: updatedUser.headline,
+      skills: updatedUser.skills,
+      experiences: updatedUser.experiences,
+      interests: updatedUser.interests,
+      token: generateToken(updatedUser._id), // İsteğe bağlı, token'ı tazelemek için
+    });
+  } else {
+    res.status(404);
+    throw new Error('Kullanıcı bulunamadı');
+  }
+});
+
 module.exports = {
   registerUser,
   loginUser,
   getMe,
+  updateUserProfile, 
 };
