@@ -1,6 +1,7 @@
 const User = require('../models/userModel');
 const asyncHandler = require('express-async-handler'); // Hata yakalamayı kolaylaştırır
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
 // JWT oluşturan yardımcı fonksiyon
 const generateToken = (id) => {
@@ -49,6 +50,39 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Kullanıcı girişi yapar ve token döndürür
+// @route   POST /api/users/login
+// @access  Public
+const loginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  // Kullanıcıyı e-postasına göre bul
+  const user = await User.findOne({ email });
+
+  // Kullanıcı var mı VE girdiği şifre doğru mu diye kontrol et
+  if (user && (await bcrypt.compare(password, user.password))) {
+    res.json({
+      _id: user.id,
+      name: user.name,
+      email: user.email,
+      token: generateToken(user._id),
+    });
+  } else {
+    res.status(401); // 401 Unauthorized
+    throw new Error('Geçersiz e-posta veya şifre');
+  }
+});
+
+// @desc    Kullanıcı profilini getirir
+// @route   GET /api/users/me
+// @access  Private
+const getMe = asyncHandler(async (req, res) => {
+  // req.user objesi, protect middleware'i tarafından eklendi
+  res.status(200).json(req.user);
+});
+
 module.exports = {
   registerUser,
+  loginUser,
+  getMe,
 };
