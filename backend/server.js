@@ -1,18 +1,27 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-// Express uygulamasını oluştur
+const connectDB = require('./config/db');
+
+// Veritabanına bağlan
+connectDB();
+
 const app = express();
-// Middleware'ler
-app.use(cors()); // CORS'u etkinleştir
-app.use(express.json()); // Gelen JSON isteklerini parse et
-// Basit bir test route'u
+
+app.use(cors());
+app.use(express.json());
+
+// Ana Route
 app.get('/', (req, res) => {
-res.send('Potansya API Sunucusu Çalışıyor! 🚀');
+  res.send('Potansya API Sunucusu Çalışıyor! 🚀');
 });
-// Sunucuyu dinleyeceğimiz port'u belirle
-const PORT = process.env.PORT || 5001; // .env'de PORT varsa onu, yoksa 5001'i kullan
-// Sunucuyu başlat
+
+// TODO: Route'ları buraya ekleyeceğiz
+// app.use('/api/users', require('./routes/userRoutes'));
+
+
+const PORT = process.env.PORT || 5001;
+
 app.listen(PORT, () => {
-console.log(`Sunucu http://localhost:${PORT} adresinde başlatıldı.`);
+  console.log(`Sunucu http://localhost:${PORT} adresinde başlatıldı.`);
 });
