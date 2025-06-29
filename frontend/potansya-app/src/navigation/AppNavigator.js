@@ -1,19 +1,31 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useAuth } from '../hooks/useAuth'; // useAuth hook'unu import et
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useAuth } from '../hooks/useAuth';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 
+// Ekranlar
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 
 const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+// Giriş yapmış kullanıcıların göreceği Tab Navigator
+function AppTabs() {
+  return (
+    <Tab.Navigator screenOptions={{ headerShown: false }}>
+      <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Ana Sayfa' }}/>
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profil' }} />
+    </Tab.Navigator>
+  );
+}
 
 const AppNavigator = () => {
-  // AuthContext'ten token ve isLoading durumlarını al
   const { token, isLoading } = useAuth();
 
-  // Eğer uygulama ilk açıldığında token'ı kontrol ediyorsak, bir yükleme ekranı göster
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -26,23 +38,22 @@ const AppNavigator = () => {
     <NavigationContainer>
       <Stack.Navigator>
         {token ? (
-          // Eğer token varsa (kullanıcı giriş yapmışsa), ana ekranları göster
-          <Stack.Screen name="Home" component={HomeScreen} />
-          // TODO: Buraya Profil, Ayarlar gibi diğer ekranlar eklenecek
+          // Token varsa, ana Tab Navigator'ı göster
+          <Stack.Screen name="App" component={AppTabs} options={{ headerShown: false }} />
         ) : (
-          // Eğer token yoksa (kullanıcı giriş yapmamışsa), giriş ekranını göster
+          // Token yoksa, Login ekranını göster
           <Stack.Screen 
             name="Login" 
             component={LoginScreen} 
             options={{ headerShown: false }} 
           />
-          // TODO: Buraya Kayıt Ol ekranı eklenecek
         )}
       </Stack.Navigator>
     </NavigationContainer>
   );
 };
 
+// styles aynı kalabilir...
 const styles = StyleSheet.create({
     loadingContainer: {
         flex: 1,
