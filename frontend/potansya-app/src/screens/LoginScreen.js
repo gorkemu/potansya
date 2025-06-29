@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Button, TextInput, Alert } from 'react-native';
-import { api } from '../api/api'; 
+import { useAuth } from '../hooks/useAuth'; // Kendi hook'umuzu import ediyoruz
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // AuthContext'ten login fonksiyonunu ve diğer değerleri alıyoruz
+  const { login } = useAuth();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -15,18 +18,12 @@ const LoginScreen = () => {
 
     setLoading(true);
     try {
-      const response = await api.post('/users/login', {
-        email,
-        password,
-      });
-
-      console.log('Giriş Başarılı:', response.data);
-      Alert.alert('Başarılı', `Hoş geldin, ${response.data.name}!`);
-      
-      // TODO: Gelen token'ı kaydet ve ana ekrana yönlendir.
-
+      // Artık doğrudan context'teki login fonksiyonunu çağırıyoruz
+      await login(email, password);
+      // Başarılı olursa, AppNavigator bizi otomatik olarak ana ekrana yönlendirecek.
+      // Bu yüzden burada bir şey yapmamıza gerek yok.
     } catch (error) {
-      console.error('Giriş Hatası:', error.response ? error.response.data : error.message);
+      console.error('Giriş Hatası:', error);
       Alert.alert('Giriş Başarısız', 'E-posta veya şifre hatalı.');
     } finally {
       setLoading(false);
@@ -62,6 +59,7 @@ const LoginScreen = () => {
   );
 };
 
+// Styles kısmı aynı kalabilir...
 const styles = StyleSheet.create({
   container: {
     flex: 1,
